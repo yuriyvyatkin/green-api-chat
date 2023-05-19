@@ -62,13 +62,7 @@ export default function EntryForm() {
     setError,
     formState: { errors, isSubmitted, isValid, isSubmitting },
     handleSubmit,
-  } = useForm<FormValues>({
-    defaultValues: {
-      id: '1101821368',
-      token: 'a006a3688e0d49e784c14450ce17641caf4e5eb075a04304b3',
-      phone: '996222560560',
-    },
-  });
+  } = useForm<FormValues>();
   const dispatch = useAppDispatch();
 
   const submitForm = async (data: FormValues) => {
