@@ -13,7 +13,7 @@ export default function customFetch(
 
   return new Promise((resolve, reject) => {
     fetch(
-      process.env.REACT_APP_API_URL +
+        'https://api.green-api.com/waInstance' +
         instance.id +
         '/' +
         method +
