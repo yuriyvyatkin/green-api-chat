@@ -8,6 +8,7 @@ import {
 import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
+import findValueByKey from '../../helpers/findValueByKey';
 import useCustomFetch from '../../hooks/useCustomFetch/useCustomFetch';
 import { toggleAuthorization } from '../entryForm/entryFormSlice';
 import './Chat.css';
@@ -32,8 +33,11 @@ type Notification = {
   };
 };
 
+type DeleteNotification = {
+  result: boolean;
+};
+
 export default function Chat() {
-  const [messageIds, setMessageIds] = useState<Set<string>>(new Set());
   const [notificationHandling, setNotificationHandling] = useState(false);
   const user = useAppSelector((store) => store.user);
   const messages = useAppSelector((store) => store.messages);
@@ -45,22 +49,12 @@ export default function Chat() {
     token: user.token,
   };
 
-  const updateMessageIds = (
-    prevState: Set<string>,
-    newId: string | undefined,
-  ) => {
-    if (newId) {
-      const newState = new Set(prevState);
-      newState.add(newId);
-      return newState;
-    }
-    return prevState;
-  };
-
-  const handleNotification = (notification: Notification) => {
-    if (notificationHandling) {
+  const handleNotification = async (notification: Notification) => {
+    if (notificationHandling || notification === null || !notification.hasOwnProperty('body')) {
       return;
     }
+
+    setNotificationHandling(true);
 
     let type = notification.body.typeWebhook;
 
@@ -68,69 +62,72 @@ export default function Chat() {
       type = 'outgoing';
     } else if (type === 'outgoingMessageReceived') {
       type = 'incoming';
+    } else if (
+      type === 'stateInstanceChanged' &&
+      notification.body.stateInstance !== 'authorized'
+    ) {
+      dispatch(toggleAuthorization());
+
+      return;
     } else {
       return;
     }
 
-    setNotificationHandling(true);
+    const response = (await deleteNotification(
+      instance,
+      notification.receiptId,
+    )) as DeleteNotification;
 
-    const newId = notification.body.idMessage;
-
-    if (
-      notification.body.hasOwnProperty('stateInstance') &&
-      notification.body.stateInstance === 'authorized'
-    ) {
-      dispatch(toggleAuthorization());
-    } else if (!messageIds.has(newId as string)) {
-      setMessageIds((prevState) => updateMessageIds(prevState, newId));
-      const text =
-        type === 'incoming'
-          ? notification.body?.messageData?.textMessageData.textMessage
-          : notification.body?.messageData?.extendedTextMessageData.text;
-
+    if (response.result || response === null) {
       dispatch(
         addMessage({
           id: notification.body.idMessage,
-          text: text,
+          text: findValueByKey(notification, 'text'),
           timestamp: notification.body.timestamp,
           type: type,
         }),
       );
-    }
 
-    deleteNotification(instance, notification.receiptId);
-    setNotificationHandling(false);
+      setNotificationHandling(false);
+    }
   };
 
   useEffect(() => {
-    const checkIncomingMessages = async () => {
-      try {
-        const data = await getNotification(instance);
-        const notification: Notification = data as Notification;
+    if (!notificationHandling) {
+      const checkIncomingMessages = async () => {
+        try {
+          const notification = (await getNotification(instance)) as Notification;
 
-        if (notification && !notificationHandling) {
-          handleNotification(notification);
+          if (
+            notification
+          ) {
+            await handleNotification(notification);
+          }
+        } catch (error) {
+          console.error('Ошибка: ', error);
         }
-      } catch (error) {
-        console.error('Ошибка: ', error);
-      }
-    };
+      };
 
-    const intervalId = setInterval(checkIncomingMessages, 10000);
+      const intervalId = setInterval(checkIncomingMessages, 5000);
 
-    return () => {
-      clearInterval(intervalId);
-    };
+      return () => {
+        clearInterval(intervalId);
+      };
+    }
   }, []);
 
   const handleSubmit = async (text: string) => {
     try {
+      let notification;
+
       await sendText(instance, text, user.phone);
 
-      const notification = (await getNotification(instance)) as Notification;
+      notification = (await getNotification(instance)) as Notification;
 
-      if (notification && !notificationHandling) {
-        handleNotification(notification);
+      if (
+        !notificationHandling
+      ) {
+        await handleNotification(notification);
       }
     } catch (error) {
       console.error('Ошибка: ', error);
@@ -161,7 +158,7 @@ export default function Chat() {
             attachButton={false}
             sendButton={false}
             placeholder="Введите сообщение"
-            disabled = {notificationHandling}
+            disabled={notificationHandling}
             autoFocus
           />
         </ChatContainer>

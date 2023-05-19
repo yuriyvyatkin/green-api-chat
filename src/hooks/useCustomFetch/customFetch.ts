@@ -26,7 +26,9 @@ export default function customFetch(
     )
       .then((response) => {
         if (response.status === 200) {
-          return response.json();
+          const result = response.json();
+          console.log(result);
+          return result;
         } else {
           reject(response.statusText);
         }
