@@ -7,7 +7,7 @@ type Message = {
   type: 'incoming' | 'outgoing';
 };
 
-const initialState: Array<Message> =[];
+const initialState: Array<Message> = [];
 
 const chatSlice = createSlice({
   name: 'data',

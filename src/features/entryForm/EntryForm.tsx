@@ -1,5 +1,6 @@
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
 import Container from '@mui/material/Container';
 import CssBaseline from '@mui/material/CssBaseline';
 import Grid from '@mui/material/Grid';
@@ -62,7 +63,13 @@ export default function EntryForm() {
     setError,
     formState: { errors, isSubmitted, isValid, isSubmitting },
     handleSubmit,
-  } = useForm<FormValues>();
+  } = useForm<FormValues>({
+    defaultValues: {
+      id: '1101821368',
+      token: 'a006a3688e0d49e784c14450ce17641caf4e5eb075a04304b3',
+      phone: '996222560560',
+    },
+  });
   const dispatch = useAppDispatch();
 
   const submitForm = async (data: FormValues) => {
@@ -228,7 +235,7 @@ export default function EntryForm() {
                 }}
                 disabled={isSubmitting || (isSubmitted && !isValid)}
               >
-                Создать чат
+                {isSubmitting ? <CircularProgress color="inherit" /> : 'Создать чат'}
               </Button>
               {fetchError && <CustomAlert text={fetchError} />}
               <a

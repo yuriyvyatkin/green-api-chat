@@ -1,6 +1,8 @@
 ## Чат на основе Green API
 
-**Стек**: [React](https://ru.reactjs.org/), [Redux Toolkit](https://redux-toolkit.js.org/), [TypeScript](https://www.typescriptlang.org/)
+**🛠️ Стек**
+
+React + Redux Toolkit + TypeScript
 
 **💬 Информация о проекте**:
 Это  пользовательский интерфейс для
