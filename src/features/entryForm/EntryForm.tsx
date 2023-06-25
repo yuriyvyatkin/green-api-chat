@@ -20,12 +20,41 @@ const theme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
+          fontSize: '1.1rem',
           '&:disabled': {
             pointerEvents: 'unset',
             cursor: 'not-allowed',
           },
         },
       },
+    },
+    MuiAlert: {
+      styleOverrides: {
+        message: {
+          fontSize: '1.1rem',
+        },
+      },
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiFormHelperText-root': {
+            fontSize: '1.1rem',
+          },
+        },
+      },
+    },
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          color: 'grey',
+        },
+      },
+    },
+  },
+  typography: {
+    body1: {
+      fontSize: '1.4rem',
     },
   },
 });
@@ -61,15 +90,9 @@ export default function EntryForm() {
   const {
     register,
     setError,
-    formState: { errors, isSubmitted, isValid, isSubmitting },
+    formState: { errors, isSubmitting },
     handleSubmit,
-  } = useForm<FormValues>({
-    defaultValues: {
-      id: '1101821368',
-      token: 'a006a3688e0d49e784c14450ce17641caf4e5eb075a04304b3',
-      phone: '996222560560',
-    },
-  });
+  } = useForm<FormValues>();
   const dispatch = useAppDispatch();
 
   const submitForm = async (data: FormValues) => {
@@ -188,7 +211,7 @@ export default function EntryForm() {
                     label="Ваш ID"
                     autoFocus
                     autoComplete="off"
-                    disabled={isSubmitting || (isSubmitted && !isValid)}
+                    disabled={isSubmitting}
                   />
                 </Grid>
                 {errors.id && <CustomAlert type={errors.id?.type} />}
@@ -203,7 +226,7 @@ export default function EntryForm() {
                     fullWidth
                     label="Ваш токен"
                     autoComplete="off"
-                    disabled={isSubmitting || (isSubmitted && !isValid)}
+                    disabled={isSubmitting}
                   />
                 </Grid>
                 {errors.token && <CustomAlert type={errors.token?.type} />}
@@ -220,7 +243,7 @@ export default function EntryForm() {
                     type="phone"
                     autoComplete="off"
                     helperText="Пример: 79995550404"
-                    disabled={isSubmitting || (isSubmitted && !isValid)}
+                    disabled={isSubmitting}
                   />
                 </Grid>
                 {errors.phone && <CustomAlert type={errors.phone?.type} />}
@@ -233,7 +256,7 @@ export default function EntryForm() {
                   mt: 3,
                   mb: 2,
                 }}
-                disabled={isSubmitting || (isSubmitted && !isValid)}
+                disabled={isSubmitting}
               >
                 {isSubmitting ? <CircularProgress color="inherit" /> : 'Создать чат'}
               </Button>
