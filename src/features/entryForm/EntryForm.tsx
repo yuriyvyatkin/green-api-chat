@@ -20,10 +20,14 @@ const theme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
+          backgroundColor: 'rgba(0, 128, 105, .7)',
           fontSize: '1.1rem',
           '&:disabled': {
             pointerEvents: 'unset',
             cursor: 'not-allowed',
+          },
+          '&:hover': {
+            backgroundColor: 'rgba(0, 128, 105, 1)',
           },
         },
       },
