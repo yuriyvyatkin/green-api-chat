@@ -17,6 +17,13 @@ import { addUserData, toggleAuthorization } from './entryFormSlice';
 
 const theme = createTheme({
   components: {
+    MuiContainer: {
+      styleOverrides: {
+        root: {
+          minWidth: '300px',
+        },
+      },
+    },
     MuiButton: {
       styleOverrides: {
         root: {
