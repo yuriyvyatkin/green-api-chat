@@ -13,7 +13,7 @@ export default function customFetch(
 
   return new Promise((resolve, reject) => {
     fetch(
-        'https://api.green-api.com/waInstance' +
+      'https://api.green-api.com/waInstance' +
         instance.id +
         '/' +
         method +
@@ -26,9 +26,7 @@ export default function customFetch(
     )
       .then((response) => {
         if (response.status === 200) {
-          const result = response.json();
-          console.log(result);
-          return result;
+          return response.json();
         } else {
           reject(response.statusText);
         }
@@ -38,6 +36,6 @@ export default function customFetch(
       })
       .catch((error) => {
         reject(error);
-      })
+      });
   });
 }

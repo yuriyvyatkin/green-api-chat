@@ -74,11 +74,7 @@ type InstanceState = {
 };
 
 type Notification = {
-  receiptId: number;
-};
-
-type DeleteNotification = {
-  result: boolean;
+  idMessage: string;
 };
 
 export default function EntryForm() {
@@ -88,8 +84,6 @@ export default function EntryForm() {
     getStateInstance,
     setSettings,
     sendText,
-    getNotification,
-    deleteNotification,
   } = useCustomFetch();
   const {
     register,
@@ -120,48 +114,25 @@ export default function EntryForm() {
         return;
       }
 
-      // отчищаем очередь уведомлений
+      // проверяем валидность номера собеседника, пока не получим ответ или ошибку от сервера
       let notification;
 
-      notification = (await getNotification(instance)) as Notification;
-
-      while (notification) {
-        (await deleteNotification(
-          instance,
-          notification.receiptId,
-        )) as DeleteNotification;
-
-        notification = (await getNotification(instance)) as Notification;
-      }
-
-      // проверяем валидность номера собеседника, пока не получим ответ или ошибку от сервера
       do {
-        await sendText(instance, 'тестовое сообщение', data.phone);
-
-        notification = (await getNotification(instance)) as Notification;
+        notification = await sendText(instance, 'тестовое сообщение', data.phone) as Notification;
       } while (!notification);
 
-      // удаляем, полученное уведомление
-      const response = (await deleteNotification(
-        instance,
-        notification.receiptId,
-      )) as DeleteNotification;
+      // устанавливаем базовые настройки для использования чата
+      await setSettings(instance, {
+        delaySendMessagesMilliseconds: 500,
+        outgoingAPIMessageWebhook: 'yes',
+        incomingWebhook: 'yes',
+        stateWebhook: 'yes',
+      });
 
-      if (response.result) {
-        // устанавливаем базовые настройки для использования чата
-
-        await setSettings(instance, {
-          delaySendMessagesMilliseconds: 500,
-          outgoingAPIMessageWebhook: 'yes',
-          incomingWebhook: 'yes',
-          stateWebhook: 'yes',
-        });
-
-        await Promise.all([
-          dispatch(addUserData(data)),
-          dispatch(toggleAuthorization()),
-        ]);
-      }
+      await Promise.all([
+        dispatch(addUserData(data)),
+        dispatch(toggleAuthorization()),
+      ]);
     } catch (error) {
       const errorMessage = String(error).toLowerCase();
 
@@ -186,7 +157,7 @@ export default function EntryForm() {
   return (
     <div className="wrapper">
       <ThemeProvider theme={theme}>
-        <Container component="main" maxWidth="xs">
+        <Container component="main" maxWidth="sm">
           <CssBaseline />
           <Box
             sx={{
